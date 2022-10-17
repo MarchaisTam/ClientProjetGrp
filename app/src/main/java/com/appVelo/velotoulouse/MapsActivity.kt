@@ -1,17 +1,19 @@
 package com.appVelo.velotoulouse
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWindowAdapter {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -26,6 +28,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        binding.btGetBikeStations.setOnClickListener {
+
+            var res = RequestUtils.loadBikeStations()
+
+            res.forEach {
+                val bikeStation = LatLng(it.position.lat, it.position.lon)
+                mMap.addMarker(MarkerOptions().position(bikeStation).title(it.name))
+
+            }
+
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+    }
+
+    override fun onStop() {
+        super.onStop()
     }
 
     /**
@@ -40,9 +63,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+        mMap.setInfoWindowAdapter(this)
+
+
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val toulouse = LatLng(43.604652, 1.444209)
+        mMap.addMarker(MarkerOptions().position(toulouse).title("Marker in Toulouse"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(toulouse))
+
+
+
+
+    }
+
+    override fun getInfoContents(p0: Marker): View? {
+        TODO("Not yet implemented")
+    }
+
+    override fun getInfoWindow(p0: Marker): View? {
+        TODO("Not yet implemented")
     }
 }
