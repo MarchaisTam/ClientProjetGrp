@@ -1,4 +1,4 @@
-package com.example.velotoulouse
+package com.appVelo.velotoulouse
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

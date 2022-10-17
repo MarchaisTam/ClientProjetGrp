@@ -1,4 +1,4 @@
-package com.example.velotoulouse
+package com.appVelo.velotoulouse
 
 import org.junit.Test
 
