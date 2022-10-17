@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.velotoulouse'
+    namespace 'com.appVelo.velotoulouse'
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.example.velotoulouse"
+        applicationId 'com.appVelo.velotoulouse'
         minSdk 27
         targetSdk 32
         versionCode 1
