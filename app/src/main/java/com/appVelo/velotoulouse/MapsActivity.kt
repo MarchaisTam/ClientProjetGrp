@@ -1,17 +1,17 @@
 package com.appVelo.velotoulouse
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-
+import androidx.appcompat.app.AppCompatActivity
+import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWindowAdapter {
 
@@ -28,6 +28,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        binding.btGetBikeStations.setOnClickListener {
+
+            var res = RequestUtils.loadBikeStations()
+
+            res.forEach {
+                val bikeStation = LatLng(it.position.lat, it.position.lon)
+                mMap.addMarker(MarkerOptions().position(bikeStation).title(it.name))
+
+            }
+
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+    }
+
+    override fun onStop() {
+        super.onStop()
     }
 
     /**
@@ -50,9 +71,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         mMap.addMarker(MarkerOptions().position(toulouse).title("Marker in Toulouse"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(toulouse))
 
-        binding.btGetBikeStations.setOnClickListener {
 
-        }
 
 
     }
