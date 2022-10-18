@@ -2,7 +2,7 @@ package com.appVelo.velotoulouse
 
 class CoordBean (
     var lat : Double,
-    var lon : Double
+    var lng : Double
         ) {
     fun toString(coordBean: CoordBean) : String {
         return coordBean.toString()

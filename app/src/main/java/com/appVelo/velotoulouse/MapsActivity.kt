@@ -3,14 +3,17 @@ package com.appVelo.velotoulouse
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlin.concurrent.thread
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWindowAdapter {
@@ -29,17 +32,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        binding.btGetBikeStations.setOnClickListener {
+        binding.btGetBikeStations.isVisible = false
+        binding.btGetNearestBikeStations.isVisible = false
+        setOnclickListeners()
 
-            var res = RequestUtils.loadBikeStations()
 
-            res.forEach {
-                val bikeStation = LatLng(it.position.lat, it.position.lon)
-                mMap.addMarker(MarkerOptions().position(bikeStation).title(it.name))
-
-            }
-
-        }
     }
 
     override fun onStart() {
@@ -71,7 +68,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         mMap.addMarker(MarkerOptions().position(toulouse).title("Marker in Toulouse"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(toulouse))
 
-
+        binding.btGetBikeStations.isVisible = true
+        binding.btGetNearestBikeStations.isVisible = true
 
 
     }
@@ -82,5 +80,52 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
     override fun getInfoWindow(p0: Marker): View? {
         TODO("Not yet implemented")
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    fun askPermission() {
+
+    }
+
+    fun setModelObservers () {
+
+    }
+
+    fun setOnclickListeners () {
+        binding.btGetBikeStations.setOnClickListener {
+
+            thread {
+                var res = RequestUtils.loadBikeStations()
+
+                runOnUiThread {
+
+                    res.forEach {
+                        val bikeStation = LatLng(it.position.lat, it.position.lng)
+                        mMap.addMarker(MarkerOptions().position(bikeStation).title(it.name).snippet(it.address))
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bikeStation, 10f))
+
+
+                       // val melbourneLatLng = LatLng(-37.81319, 144.96298)
+                       // val melbourne = mMap.addMarker(MarkerOptions().position(melbourneLatLng).title("Melbourne")
+                        //)
+                        //melbourne?.showInfoWindow()
+
+
+
+                    }
+
+
+
+                }
+            }
+
+        }
     }
 }
