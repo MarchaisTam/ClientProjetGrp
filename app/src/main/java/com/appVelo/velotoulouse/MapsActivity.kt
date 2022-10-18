@@ -1,6 +1,7 @@
 package com.appVelo.velotoulouse
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -17,6 +18,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -43,7 +45,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
         binding.btGetBikeStations.isVisible = false
         binding.btGetNearestBikeStations.isVisible = false
-        binding.textView.isVisible = false
+        binding.tvError.isVisible = false
         setOnclickListeners()
 
     }
@@ -69,6 +71,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+        askPermission()
         mMap.setInfoWindowAdapter(this)
         println("map ready")
         setModelObservers()
@@ -100,7 +103,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
             == PackageManager.PERMISSION_GRANTED
         ) {
             //On a la permission
-            //LocationUtils.getLastKnownCoord()
+            onLocationPermissonGranted()
         } else {
             Toast.makeText(this, "Il faut la permission", Toast.LENGTH_SHORT).show()
         }
@@ -117,6 +120,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
 
     fun askPermission() {
+        println("dans askPermission")
+        println(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION))
         //Est ce que j'ai la permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
@@ -130,6 +135,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
     fun setModelObservers() {
         model.data.observe(this) {
+            mMap.clear()
+            onLocationPermissonGranted()
             it.forEach {
                 val bikeStation = it.position.toLatLng()
                 mMap.addMarker(
@@ -146,12 +153,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
         model.errorMessage.observe(this) {
             if(it != null) {
-                binding.textView.isVisible = true
-                binding.textView.text = it
+                binding.tvError.isVisible = true
+                binding.tvError.text = it
             }
             else {
-                binding.textView.isVisible = false
+                binding.tvError.isVisible = false
             }
+        }
+
+        model.runInProgress.observe(this) {
+            binding.progressBar.isVisible = it != false
         }
 
     }
@@ -161,4 +172,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
                 model.loadData()
         }
     }
+
+    fun onLocationPermissonGranted () {
+        println("dans onrequestpermiResult")
+
+        var userLocation = LocationUtils.getLastKnownCoord(this)
+        println(userLocation)
+        if (userLocation != null ) {
+            mMap.addMarker(MarkerOptions().position(userLocation.toLatLng()).title("Marker on user")
+                .icon(BitmapDescriptorFactory.defaultMarker(HUE_AZURE)))
+        }
+    }
+
 }
