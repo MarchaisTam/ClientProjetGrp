@@ -3,6 +3,7 @@ package com.appVelo.velotoulouse
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import com.appVelo.velotoulouse.LocationUtils.getLastKnownCoord
 import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -46,6 +48,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         binding.btGetBikeStations.isVisible = false
         binding.btGetNearestBikeStations.isVisible = false
         binding.tvError.isVisible = false
+        binding.progressBar.isVisible = false
         setOnclickListeners()
         model.loadData()
 
@@ -144,7 +147,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
                     MarkerOptions().position(bikeStation).title(it.name).snippet(it.address)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
                 )
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bikeStation, 12f))
+                //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bikeStation, 12f))
 
                 // val melbourneLatLng = LatLng(-37.81319, 144.96298)
                 // val melbourne = mMap.addMarker(MarkerOptions().position(melbourneLatLng).title("Melbourne"))
@@ -154,7 +157,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         }
 
         model.errorMessage.observe(this) {
-            if(it != null) {
+            if(!it.isNullOrEmpty()) {
                 binding.tvError.isVisible = true
                 binding.tvError.text = it
             }
@@ -175,18 +178,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         }
 
         binding.btGetNearestBikeStations.setOnClickListener {
-            model.applyFilter(true, true, LocationUtils.getLastKnownLocation(this))
+            model.applyFilter(true, true, LocationUtils.getLastKnownLocation(this), 20)
         }
+        
     }
 
     fun onLocationPermissonGranted () {
         println("dans onrequestpermiResult")
 
         var userLocation = LocationUtils.getLastKnownCoord(this)
-        println(userLocation)
+
+        println("userLocation : " + userLocation)
         if (userLocation != null ) {
             mMap.addMarker(MarkerOptions().position(userLocation.toLatLng()).title("Marker on user")
                 .icon(BitmapDescriptorFactory.defaultMarker(HUE_AZURE)))
+        } else {
+            Toast.makeText(this, "Pas de localisation", Toast.LENGTH_SHORT).show()
         }
     }
 
