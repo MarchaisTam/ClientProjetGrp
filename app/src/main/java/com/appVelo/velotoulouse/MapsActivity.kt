@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.ViewModelProvider
 import com.appVelo.velotoulouse.LocationUtils.getLastKnownCoord
 import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
@@ -81,19 +83,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         setModelObservers()
         println("model observé")
 
-
-        // Add a marker in toulouse and move the camera
+        // Move the camera
         val toulouse = LatLng(43.604652, 1.444209)
-        mMap.addMarker(MarkerOptions().position(toulouse).title("Marker in Toulouse"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(toulouse, 10f))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(toulouse, 12f))
 
         binding.btGetBikeStations.isVisible = true
         binding.btGetNearestBikeStations.isVisible = true
-
-
     }
-
-
 
 
 
@@ -141,19 +137,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         model.dataShown.observe(this) {
             mMap.clear()
             onLocationPermissonGranted()
-            it.forEach {
+            it?.forEach {
                 val bikeStation = it.position.toLatLng()
                 mMap.addMarker(
                     MarkerOptions().position(bikeStation).title(it.name).snippet(it.address)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
                 )
-                //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bikeStation, 12f))
-
-                // val melbourneLatLng = LatLng(-37.81319, 144.96298)
-                // val melbourne = mMap.addMarker(MarkerOptions().position(melbourneLatLng).title("Melbourne"))
-                //melbourne?.showInfoWindow()
             }
-            println("stations marked count=${it.size}")
+
+
+            println("stations marked count=${it?.size}")
         }
 
         model.errorMessage.observe(this) {
@@ -173,12 +166,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     }
 
     fun setOnclickListeners() {
+        binding.etNbShown.addTextChangedListener {
+            binding.btGetNearestBikeStations.setText(binding.etNbShown.text.toString() + " stations à proximités")
+        }
+
         binding.btGetBikeStations.setOnClickListener {
-            model.applyFilter()
+            model.applyFilter(binding.cbPlaceDispo.isChecked, binding.cbVeloDispo.isChecked)
         }
 
         binding.btGetNearestBikeStations.setOnClickListener {
-            model.applyFilter(true, true, LocationUtils.getLastKnownLocation(this), 20)
+            model.applyFilter(binding.cbPlaceDispo.isChecked, binding.cbVeloDispo.isChecked, LocationUtils.getLastKnownLocation(this), binding.etNbShown.text.toString().toInt())
         }
         
     }

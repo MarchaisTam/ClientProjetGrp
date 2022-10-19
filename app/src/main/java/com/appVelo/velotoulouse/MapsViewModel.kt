@@ -44,7 +44,7 @@ class MapsViewModel : ViewModel() {
                     }?.sortedBy {
                         userLocation?.distanceTo(it.getLocation())
                     }?.let {
-                        it.take(nbShown ?: it.size)
+                        if (nbShown is Int) it.take (nbShown) else it
                     }
         )
     }
