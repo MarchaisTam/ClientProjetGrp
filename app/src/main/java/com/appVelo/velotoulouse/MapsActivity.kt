@@ -126,6 +126,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
             //on a la permisssion
+
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0
@@ -181,16 +182,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     }
 
     fun onLocationPermissonGranted () {
-        println("dans onrequestpermiResult")
-
-        var userLocation = LocationUtils.getLastKnownCoord(this)
-
-        println("userLocation : " + userLocation)
-        if (userLocation != null ) {
-            mMap.addMarker(MarkerOptions().position(userLocation.toLatLng()).title("Marker on user")
-                .icon(BitmapDescriptorFactory.defaultMarker(HUE_AZURE)))
-        } else {
-            Toast.makeText(this, "Pas de localisation", Toast.LENGTH_SHORT).show()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            mMap.isMyLocationEnabled = true
         }
     }
 
