@@ -1,6 +1,5 @@
 package com.appVelo.velotoulouse
 
-import android.location.Location
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlin.concurrent.thread
@@ -8,6 +7,7 @@ import kotlin.concurrent.thread
 class MapsViewModel : ViewModel() {
     //Besoin de l'écran
     val data = MutableLiveData<List<BikeStationBean>>()
+    val dataShow = MutableLiveData<List<BikeStationBean>>()
     val errorMessage = MutableLiveData("")
     val runInProgress = MutableLiveData(false)
 

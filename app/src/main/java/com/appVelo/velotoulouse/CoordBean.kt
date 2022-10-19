@@ -1,9 +1,13 @@
 package com.appVelo.velotoulouse
 
 import com.google.android.gms.maps.model.LatLng
+import com.google.gson.annotations.SerializedName
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class CoordBean (
     var lat : Double,
+    @SerializedName("lng", alternate = ["lon"])
     var lon : Double
         ) {
     fun toString(coordBean: CoordBean) : String {
@@ -12,5 +16,9 @@ class CoordBean (
 
     fun toLatLng() : LatLng {
         return LatLng(lat, lon)
+    }
+
+    fun distanceTo(coord: CoordBean): Double {
+        return sqrt ((lat - coord.lat).pow(2) + (lon -coord.lon).pow(2))
     }
 }

@@ -14,9 +14,10 @@ import java.io.InputStreamReader
 
 object RequestUtils {
 
+    private val isServerUp = true
     private const val BIKESTATIONAPI_URL =
         "https://api.jcdecaux.com/vls/v1/stations?apiKey=2a1b07b2a523f81188fe34e348206a57ffa6f2a7&contract="
-    private const val URL_SERVEUR = "http://2.4.228.11:8080"
+    private const val URL_SERVEUR = "http://192.168.1.17:8080"
     private val client = OkHttpClient()
     private val gson = Gson()
 
@@ -35,6 +36,9 @@ object RequestUtils {
             gson.fromJson(it, t)
         }
 
-    fun loadBikeStations() =
-        loadFromJson("$URL_SERVEUR/bike-stations", Array<BikeStationBean>::class.java).toList()
+    fun loadBikeStations() = this.let {
+        val url = if (isServerUp) "$URL_SERVEUR/bike-stations" else "${BIKESTATIONAPI_URL}Toulouse"
+        loadFromJson(url, Array<BikeStationBean>::class.java).toList()
+    }
+
 }
