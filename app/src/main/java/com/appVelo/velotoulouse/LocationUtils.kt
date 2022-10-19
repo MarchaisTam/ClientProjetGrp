@@ -9,7 +9,7 @@ import androidx.core.content.ContextCompat
 
 object LocationUtils {
 
-    private fun getLastKnownLocation(c: Context): Location? {
+    fun getLastKnownLocation(c: Context): Location? {
 
         //Contrôle de la permission
         if (ContextCompat.checkSelfPermission(c, Manifest.permission.ACCESS_FINE_LOCATION)

@@ -17,8 +17,4 @@ class CoordBean (
     fun toLatLng() : LatLng {
         return LatLng(lat, lon)
     }
-
-    fun distanceTo(coord: CoordBean): Double {
-        return sqrt ((lat - coord.lat).pow(2) + (lon -coord.lon).pow(2))
-    }
 }

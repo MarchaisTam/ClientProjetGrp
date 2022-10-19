@@ -47,6 +47,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         binding.btGetNearestBikeStations.isVisible = false
         binding.tvError.isVisible = false
         setOnclickListeners()
+        model.loadData()
 
     }
 
@@ -134,7 +135,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     }
 
     fun setModelObservers() {
-        model.data.observe(this) {
+        model.dataShown.observe(this) {
             mMap.clear()
             onLocationPermissonGranted()
             it.forEach {
@@ -149,6 +150,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
                 // val melbourne = mMap.addMarker(MarkerOptions().position(melbourneLatLng).title("Melbourne"))
                 //melbourne?.showInfoWindow()
             }
+            println("stations marked count=${it.size}")
         }
 
         model.errorMessage.observe(this) {
@@ -169,7 +171,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
     fun setOnclickListeners() {
         binding.btGetBikeStations.setOnClickListener {
-                model.loadData()
+            model.applyFilter()
+        }
+
+        binding.btGetNearestBikeStations.setOnClickListener {
+            model.applyFilter(true, true, LocationUtils.getLastKnownLocation(this))
         }
     }
 
