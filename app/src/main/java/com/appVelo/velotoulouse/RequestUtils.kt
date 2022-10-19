@@ -11,12 +11,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.InputStreamReader
+import kotlin.concurrent.thread
 
 object RequestUtils {
 
     private const val BIKESTATIONAPI_URL =
-        "https://api.jcdecaux.com/vls/v1/stations?apiKey=2a1b07b2a523f81188fe34e348206a57ffa6f2a7&contract="
-    private const val URL_SERVEUR = "http://2.4.228.11:8080"
+        "https://api.jcdecaux.com/vls/v1/stations?apiKey=2a1b07b2a523f81188fe34e348206a57ffa6f2a7&contract=Toulouse"
+    private const val URL_SERVEUR = "http://2.4.228.11:8080/bike-stations"
     private val client = OkHttpClient()
     private val gson = Gson()
 
@@ -36,5 +37,6 @@ object RequestUtils {
         }
 
     fun loadBikeStations() =
-        loadFromJson("$URL_SERVEUR/bike-stations", Array<BikeStationBean>::class.java).toList()
+            loadFromJson("$URL_SERVEUR", Array<BikeStationBean>::class.java).toList()
+
 }

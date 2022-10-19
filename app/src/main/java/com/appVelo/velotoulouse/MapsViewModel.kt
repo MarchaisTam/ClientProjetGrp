@@ -8,6 +8,7 @@ import kotlin.concurrent.thread
 class MapsViewModel : ViewModel() {
     //Besoin de l'écran
     val data = MutableLiveData<List<BikeStationBean>>()
+    val dataShow = MutableLiveData<List<BikeStationBean>>()
     val errorMessage = MutableLiveData("")
     val runInProgress = MutableLiveData(false)
 

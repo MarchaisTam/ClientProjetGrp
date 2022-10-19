@@ -46,6 +46,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         binding.btGetBikeStations.isVisible = false
         binding.btGetNearestBikeStations.isVisible = false
         binding.tvError.isVisible = false
+        binding.progressBar.isVisible = false
         setOnclickListeners()
 
     }
@@ -143,7 +144,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
                     MarkerOptions().position(bikeStation).title(it.name).snippet(it.address)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
                 )
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bikeStation, 12f))
+                //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(bikeStation, 12f))
 
                 // val melbourneLatLng = LatLng(-37.81319, 144.96298)
                 // val melbourne = mMap.addMarker(MarkerOptions().position(melbourneLatLng).title("Melbourne"))
@@ -152,7 +153,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         }
 
         model.errorMessage.observe(this) {
-            if(it != null) {
+            if(!it.isNullOrEmpty()) {
                 binding.tvError.isVisible = true
                 binding.tvError.text = it
             }
@@ -176,12 +177,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     fun onLocationPermissonGranted () {
         println("dans onrequestpermiResult")
 
+
         var userLocation = LocationUtils.getLastKnownCoord(this)
-        println(userLocation)
-        if (userLocation != null ) {
-            mMap.addMarker(MarkerOptions().position(userLocation.toLatLng()).title("Marker on user")
-                .icon(BitmapDescriptorFactory.defaultMarker(HUE_AZURE)))
-        }
+
+                println("userLocation : " + userLocation)
+                if (userLocation != null ) {
+                    mMap.addMarker(MarkerOptions().position(userLocation.toLatLng()).title("Marker on user")
+                        .icon(BitmapDescriptorFactory.defaultMarker(HUE_AZURE)))
+                } else {
+                    Toast.makeText(this, "Pas de localisation", Toast.LENGTH_SHORT).show()
+                }
+
+
+
+
     }
 
 }
