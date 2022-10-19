@@ -3,6 +3,7 @@ package com.appVelo.velotoulouse
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import com.appVelo.velotoulouse.LocationUtils.getLastKnownCoord
 import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -170,26 +172,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
     fun setOnclickListeners() {
         binding.btGetBikeStations.setOnClickListener {
-                model.loadData()
+            model.loadData()
         }
+        
     }
 
     fun onLocationPermissonGranted () {
         println("dans onrequestpermiResult")
 
-
         var userLocation = LocationUtils.getLastKnownCoord(this)
 
-                println("userLocation : " + userLocation)
-                if (userLocation != null ) {
-                    mMap.addMarker(MarkerOptions().position(userLocation.toLatLng()).title("Marker on user")
-                        .icon(BitmapDescriptorFactory.defaultMarker(HUE_AZURE)))
-                } else {
-                    Toast.makeText(this, "Pas de localisation", Toast.LENGTH_SHORT).show()
-                }
-
-
-
+        println("userLocation : " + userLocation)
+        if (userLocation != null ) {
+            mMap.addMarker(MarkerOptions().position(userLocation.toLatLng()).title("Marker on user")
+                .icon(BitmapDescriptorFactory.defaultMarker(HUE_AZURE)))
+        } else {
+            Toast.makeText(this, "Pas de localisation", Toast.LENGTH_SHORT).show()
+        }
 
     }
 
