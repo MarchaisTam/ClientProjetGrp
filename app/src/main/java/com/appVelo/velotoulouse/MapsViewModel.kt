@@ -7,8 +7,10 @@ import kotlin.concurrent.thread
 
 class MapsViewModel : ViewModel() {
     //Besoin de l'écran
-    val data = MutableLiveData<List<BikeStationBean>>()
+    val bikeStationData = MutableLiveData<List<BikeStationBean>>()
     val dataShown = MutableLiveData<List<BikeStationBean>>()
+    val metroStationData = MutableLiveData<List<MetroStationBean>>()
+
     val errorMessage = MutableLiveData("")
     val runInProgress = MutableLiveData(false)
 
@@ -21,8 +23,8 @@ class MapsViewModel : ViewModel() {
 
         thread {
             try {
-                data.postValue(RequestUtils.loadBikeStations())
-
+                bikeStationData.postValue(RequestUtils.loadBikeStations())
+                metroStationData.postValue(RequestUtils.loadMetroStation())
             } catch (e: Exception) {
                 e.printStackTrace()
                 errorMessage.postValue("Erreur : " + e.message)
@@ -38,7 +40,7 @@ class MapsViewModel : ViewModel() {
         nbShown: Int? = null
     ) {
         dataShown.postValue(
-            data.value?.filter {
+            bikeStationData.value?.filter {
                         (!filterAvailableBikes || it.hasAvailableBikes())
                         && (!filterAvailableStands || it.hasAvailableStands())
                     }?.sortedBy {

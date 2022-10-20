@@ -77,6 +77,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+        mMap.clear()
+
         askPermission()
         mMap.setInfoWindowAdapter(this)
         println("map ready")
@@ -136,18 +138,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
 
     fun setModelObservers() {
         model.dataShown.observe(this) {
-            mMap.clear()
-            onLocationPermissonGranted()
-            it?.forEach {
-                val bikeStation = it.position.toLatLng()
-                mMap.addMarker(
-                    MarkerOptions().position(bikeStation).title(it.name).snippet(it.address)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
-                )
-            }
-
-
-            println("stations marked count=${it?.size}")
+            refreshMap()
         }
 
         model.errorMessage.observe(this) {
@@ -164,6 +155,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
             binding.progressBar.isVisible = it != false
         }
 
+
+
     }
 
     fun setOnclickListeners() {
@@ -178,6 +171,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         binding.btGetNearestBikeStations.setOnClickListener {
             model.applyFilter(binding.cbPlaceDispo.isChecked, binding.cbVeloDispo.isChecked, LocationUtils.getLastKnownLocation(this), binding.etNbShown.text.toString().toInt())
         }
+
+        binding.switch1.setOnClickListener {
+            mMap.clear()
+            displayBikeStations()
+            displayMetroStations()
+        }
         
     }
 
@@ -186,6 +185,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
             == PackageManager.PERMISSION_GRANTED) {
             mMap.isMyLocationEnabled = true
         }
+    }
+
+    fun displayBikeStations() {
+        onLocationPermissonGranted()
+        model.dataShown.value?.forEach {
+            val bikeStation = it.position.toLatLng()
+            mMap.addMarker(
+                MarkerOptions().position(bikeStation).title(it.name).snippet(it.address)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
+            )
+        }
+    }
+
+    fun displayMetroStations() {
+        if (!binding.switch1.isChecked) return
+
+        model.metroStationData.value?.forEach {
+            val metroStation = LatLng(it.latitude, it.longitude)
+            mMap.addMarker(
+                MarkerOptions().position(metroStation).title(it.name)
+                    .icon(it.icon))
+        }
+    }
+
+    fun refreshMap() {
+        mMap.clear()
+        displayBikeStations()
+        displayMetroStations()
     }
 
 }
