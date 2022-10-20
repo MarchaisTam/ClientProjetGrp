@@ -19,7 +19,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWindowAdapter {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -72,7 +72,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         mMap.clear()
 
         askPermission()
-        mMap.setInfoWindowAdapter(this)
+        //mMap.setInfoWindowAdapter(this)
         println("map ready")
         setModelObservers()
         println("model observé")
@@ -104,13 +104,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     }
 
 
-    override fun getInfoContents(p0: Marker): View? {
-        TODO("Not yet implemented")
-    }
 
-    override fun getInfoWindow(p0: Marker): View? {
-        return null
-    }
 
 
     fun askPermission() {
@@ -187,7 +181,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
             latLngBounds.include(bikeStation)
             mMap.addMarker(
                 MarkerOptions().position(bikeStation)
-                    //.title(it.name).snippet(it.address)
+                    .title(it.name).snippet("Vélo(s) : " + it.availableBikes + "  Place(s) : " + it.availableStands)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station)))?.setTag(bikeStation)
         }
     }
@@ -200,6 +194,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
             latLngBounds.include(metroStation)
             mMap.addMarker(
                 MarkerOptions().position(metroStation).title(it.name)
+                    .title(it.name).snippet("Ligne : " + it.line)
                     .icon(BitmapDescriptorFactory.fromResource(it.icon)))
         }
     }
