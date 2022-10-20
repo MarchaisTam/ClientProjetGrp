@@ -1,9 +1,7 @@
 package com.appVelo.velotoulouse
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -12,17 +10,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.ViewModelProvider
-import com.appVelo.velotoulouse.LocationUtils.getLastKnownCoord
 import com.appVelo.velotoulouse.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE
-import kotlin.concurrent.thread
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWindowAdapter {
@@ -72,6 +66,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setMaxZoomPreference(15f)
+        //mMap.
 
         mMap.clear()
 
@@ -113,7 +109,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     }
 
     override fun getInfoWindow(p0: Marker): View? {
-        TODO("Not yet implemented")
+        return null
     }
 
 
@@ -178,6 +174,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED) {
             mMap.isMyLocationEnabled = true
+
         }
     }
 
@@ -203,7 +200,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
             latLngBounds.include(metroStation)
             mMap.addMarker(
                 MarkerOptions().position(metroStation).title(it.name)
-                    .icon(it.icon))
+                    .icon(BitmapDescriptorFactory.fromResource(it.icon)))
         }
     }
 
@@ -216,11 +213,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
     fun refreshMap() {
         mMap.clear()
         var latLngBounds = LatLngBounds.Builder()
-        val toulouse = LatLng(43.604652, 1.444209)
-        latLngBounds.include(toulouse)
+        val userLocation = LocationUtils.getLastKnownCoord(this)
+        if (userLocation != null) {
+            latLngBounds.include(userLocation.toLatLng())
+        } else {
+            val toulouseTop = LatLng(43.605326, 1.441502)
+            val toulouseDown = LatLng(43.602313, 1.444831)
+            latLngBounds.include(toulouseDown)
+            latLngBounds.include(toulouseTop)
+        }
+
         displayBikeStations(latLngBounds)
         displayMetroStations(latLngBounds)
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds.build(), 100))
+
 
     }
 
