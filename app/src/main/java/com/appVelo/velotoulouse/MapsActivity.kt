@@ -2,8 +2,8 @@ package com.appVelo.velotoulouse
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -17,12 +17,16 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import java.util.Timer
+import kotlin.concurrent.timer
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    private lateinit var mTimer: Timer
+    private var bikeStationFilter = BikeStationFilter(isDataShown = false)
     val model by lazy { ViewModelProvider(this).get(MapsViewModel::class.java) }
 
 
@@ -42,17 +46,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.tvError.isVisible = false
         binding.progressBar.isVisible = false
         setOnclickListeners()
-        model.loadData()
+        model.loadMetroStationData()
 
     }
 
     override fun onStart() {
         super.onStart()
+        mTimer = timer("DataLoad", false, 0, 61000) {
+            println("load data")
+            model.loadBikeStationData()
+            model.applyFilter(bikeStationFilter)
+        }
 
     }
 
     override fun onStop() {
         super.onStop()
+        mTimer.cancel()
     }
 
     /**
@@ -86,7 +96,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -104,15 +113,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
-
-
-
     fun askPermission() {
         println("dans askPermission")
         println(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION))
         //Est ce que j'ai la permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) {
+            != PackageManager.PERMISSION_GRANTED
+        ) {
             //on a la permisssion
 
             ActivityCompat.requestPermissions(
@@ -128,11 +135,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         model.errorMessage.observe(this) {
-            if(!it.isNullOrEmpty()) {
+            if (!it.isNullOrEmpty()) {
                 binding.tvError.isVisible = true
                 binding.tvError.text = it
-            }
-            else {
+            } else {
                 binding.tvError.isVisible = false
             }
         }
@@ -140,7 +146,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         model.runInProgress.observe(this) {
             binding.progressBar.isVisible = it != false
         }
-
 
 
     }
@@ -151,28 +156,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         binding.btGetBikeStations.setOnClickListener {
-            model.applyFilter(binding.cbPlaceDispo.isChecked, binding.cbVeloDispo.isChecked)
+            bikeStationFilter = BikeStationFilter(binding.cbVeloDispo.isChecked, binding.cbPlaceDispo.isChecked)
+            model.applyFilter(bikeStationFilter)
         }
 
         binding.btGetNearestBikeStations.setOnClickListener {
-            model.applyFilter(binding.cbPlaceDispo.isChecked, binding.cbVeloDispo.isChecked, LocationUtils.getLastKnownLocation(this), binding.etNbShown.text.toString().toInt())
+            bikeStationFilter = BikeStationFilter(
+                binding.cbVeloDispo.isChecked,
+                binding.cbPlaceDispo.isChecked,
+                LocationUtils.getLastKnownLocation(this),
+                binding.etNbShown.text.toString().toInt()
+            )
+            model.applyFilter(bikeStationFilter)
         }
 
         binding.switch1.setOnClickListener {
             refreshMap()
         }
-        
+
     }
 
-    fun onLocationPermissonGranted () {
+    fun onLocationPermissonGranted() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             mMap.isMyLocationEnabled = true
 
         }
     }
 
-    fun displayBikeStations(latLngBounds : LatLngBounds.Builder) {
+    fun displayBikeStations(latLngBounds: LatLngBounds.Builder) {
         onLocationPermissonGranted()
 
 
@@ -181,12 +194,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             latLngBounds.include(bikeStation)
             mMap.addMarker(
                 MarkerOptions().position(bikeStation)
-                    .title(it.name).snippet("Vélo(s) : " + it.availableBikes + "  Place(s) : " + it.availableStands)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station)))?.setTag(bikeStation)
+                    .title(it.name)
+                    .snippet("Vélo(s) : " + it.availableBikes + "  Place(s) : " + it.availableStands)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
+            )?.setTag(bikeStation)
         }
     }
 
-    fun displayMetroStations(latLngBounds : LatLngBounds.Builder) {
+    fun displayMetroStations(latLngBounds: LatLngBounds.Builder) {
         if (!binding.switch1.isChecked) return
 
         model.metroStationData.value?.forEach {
@@ -195,14 +210,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.addMarker(
                 MarkerOptions().position(metroStation).title(it.name)
                     .title(it.name).snippet("Ligne : " + it.line)
-                    .icon(BitmapDescriptorFactory.fromResource(it.icon)))
+                    .icon(BitmapDescriptorFactory.fromResource(it.icon))
+            )
         }
     }
-
-
-
-
-
 
 
     fun refreshMap() {

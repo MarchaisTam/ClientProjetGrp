@@ -11,7 +11,7 @@ object RequestUtils {
     private val isServerUp = true
     private const val BIKESTATIONAPI_URL =
         "https://api.jcdecaux.com/vls/v1/stations?apiKey=2a1b07b2a523f81188fe34e348206a57ffa6f2a7&contract=Toulouse"
-    private const val URL_SERVEUR = "http://2.4.228.11:8080"
+    private const val URL_SERVEUR = "http://192.168.1.17:8080"
     private const val URL_METRO_API = "http://90.76.49.229:8080/getAllStations"
 
     private val client = OkHttpClient()

@@ -15,7 +15,7 @@ class MapsViewModel : ViewModel() {
     val runInProgress = MutableLiveData(false)
 
     //Charger les données
-    fun loadData() {
+    private fun <T> load(data: MutableLiveData<T>, predicate: () -> T) {
         if (runInProgress.value!!) return
 
         errorMessage.postValue(null)
@@ -23,8 +23,7 @@ class MapsViewModel : ViewModel() {
 
         thread {
             try {
-                bikeStationData.postValue(RequestUtils.loadBikeStations())
-                metroStationData.postValue(RequestUtils.loadMetroStation())
+                data.postValue(predicate.invoke())
             } catch (e: Exception) {
                 e.printStackTrace()
                 errorMessage.postValue("Erreur : " + e.message)
@@ -33,22 +32,22 @@ class MapsViewModel : ViewModel() {
         }
     }
 
-    fun applyFilter(
-        filterAvailableBikes: Boolean = false,
-        filterAvailableStands: Boolean = false,
-        userLocation: Location? = null,
-        nbShown: Int? = null
-    ) {
+    fun loadBikeStationData() = load(bikeStationData) { RequestUtils.loadBikeStations() }
+    fun loadMetroStationData() = load(metroStationData) { RequestUtils.loadMetroStation() }
+
+    fun applyFilter(filter: BikeStationFilter) {
+        if (!filter.isDataShown) return
+
+        println("apply filter $filter")
         dataShown.postValue(
             bikeStationData.value?.filter {
-                        (!filterAvailableBikes || it.hasAvailableBikes())
-                        && (!filterAvailableStands || it.hasAvailableStands())
-                    }?.sortedBy {
-                        userLocation?.distanceTo(it.getLocation())
-                    }?.let {
-                        if (nbShown is Int) it.take (nbShown) else it
-                    }
+                (!filter.byAvailableBikes || it.hasAvailableBikes())
+                        && (!filter.byAvailableStands || it.hasAvailableStands())
+            }?.sortedBy {
+                filter.userLocation?.distanceTo(it.getLocation())
+            }?.let {
+                if (filter.nbShown is Int) it.take(filter.nbShown!!) else it
+            }
         )
     }
-
 }
