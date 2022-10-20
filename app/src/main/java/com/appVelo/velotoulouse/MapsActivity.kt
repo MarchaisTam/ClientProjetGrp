@@ -2,7 +2,6 @@ package com.appVelo.velotoulouse
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,10 +15,12 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
-import java.util.Timer
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MarkerOptions
+import java.util.*
 import kotlin.concurrent.timer
-
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -27,8 +28,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapsBinding
     private lateinit var mTimer: Timer
     private var bikeStationFilter = BikeStationFilter(isDataShown = false)
-    val model by lazy { ViewModelProvider(this).get(MapsViewModel::class.java) }
-
+    private val model by lazy { ViewModelProvider(this)[MapsViewModel::class.java] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +47,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.progressBar.isVisible = false
         setOnclickListeners()
         model.loadMetroStationData()
-
     }
 
     override fun onStart() {
@@ -57,7 +56,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             model.loadBikeStationData()
             model.applyFilter(bikeStationFilter)
         }
-
     }
 
     override fun onStop() {
@@ -77,12 +75,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMaxZoomPreference(15f)
-        //mMap.
 
         mMap.clear()
 
         askPermission()
-        //mMap.setInfoWindowAdapter(this)
         println("map ready")
         setModelObservers()
         println("model observé")
@@ -94,7 +90,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.btGetBikeStations.isVisible = true
         binding.btGetNearestBikeStations.isVisible = true
     }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -112,16 +107,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-
-    fun askPermission() {
-        println("dans askPermission")
-        println(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION))
+    private fun askPermission() {
         //Est ce que j'ai la permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            //on a la permisssion
-
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0
@@ -129,7 +119,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    fun setModelObservers() {
+    private fun setModelObservers() {
         model.dataShown.observe(this) {
             refreshMap()
         }
@@ -150,13 +140,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    fun setOnclickListeners() {
+    private fun setOnclickListeners() {
         binding.etNbShown.addTextChangedListener {
-            binding.btGetNearestBikeStations.setText(binding.etNbShown.text.toString() + " stations à proximités")
+            binding.btGetNearestBikeStations.text = binding.etNbShown.text.toString() + " stations à proximité"
         }
 
         binding.btGetBikeStations.setOnClickListener {
-            bikeStationFilter = BikeStationFilter(binding.cbVeloDispo.isChecked, binding.cbPlaceDispo.isChecked)
+            bikeStationFilter =
+                BikeStationFilter(binding.cbVeloDispo.isChecked, binding.cbPlaceDispo.isChecked)
             model.applyFilter(bikeStationFilter)
         }
 
@@ -165,7 +156,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.cbVeloDispo.isChecked,
                 binding.cbPlaceDispo.isChecked,
                 LocationUtils.getLastKnownLocation(this),
-                binding.etNbShown.text.toString().toInt()
+                runCatching { binding.etNbShown.text.toString().toInt() }.getOrDefault(0)
             )
             model.applyFilter(bikeStationFilter)
         }
@@ -173,21 +164,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.switch1.setOnClickListener {
             refreshMap()
         }
-
     }
 
-    fun onLocationPermissonGranted() {
+    private fun onLocationPermissonGranted() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED
         ) {
             mMap.isMyLocationEnabled = true
-
         }
     }
 
-    fun displayBikeStations(latLngBounds: LatLngBounds.Builder) {
+    private fun displayBikeStations(latLngBounds: LatLngBounds.Builder) {
         onLocationPermissonGranted()
-
 
         model.dataShown.value?.forEach {
             val bikeStation = it.position.toLatLng()
@@ -197,28 +185,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .title(it.name)
                     .snippet("Vélo(s) : " + it.availableBikes + "  Place(s) : " + it.availableStands)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
-            )?.setTag(bikeStation)
+            )?.tag = bikeStation
         }
     }
 
-    fun displayMetroStations(latLngBounds: LatLngBounds.Builder) {
+    private fun displayMetroStations(latLngBounds: LatLngBounds.Builder) {
         if (!binding.switch1.isChecked) return
 
         model.metroStationData.value?.forEach {
             val metroStation = LatLng(it.latitude, it.longitude)
             latLngBounds.include(metroStation)
             mMap.addMarker(
-                MarkerOptions().position(metroStation).title(it.name)
-                    .title(it.name).snippet("Ligne : " + it.line)
+                MarkerOptions().position(metroStation)
+                    .title(it.name)
+                    .snippet("Ligne : " + it.line)
                     .icon(BitmapDescriptorFactory.fromResource(it.icon))
             )
         }
     }
 
-
-    fun refreshMap() {
+    private fun refreshMap() {
         mMap.clear()
-        var latLngBounds = LatLngBounds.Builder()
+        val latLngBounds = LatLngBounds.Builder()
         val userLocation = LocationUtils.getLastKnownCoord(this)
         if (userLocation != null) {
             latLngBounds.include(userLocation.toLatLng())
@@ -232,8 +220,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         displayBikeStations(latLngBounds)
         displayMetroStations(latLngBounds)
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds.build(), 100))
-
-
     }
 
 }

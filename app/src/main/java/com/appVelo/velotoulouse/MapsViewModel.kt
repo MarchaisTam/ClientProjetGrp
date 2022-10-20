@@ -1,13 +1,12 @@
 package com.appVelo.velotoulouse
 
-import android.location.Location
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlin.concurrent.thread
 
 class MapsViewModel : ViewModel() {
     //Besoin de l'écran
-    val bikeStationData = MutableLiveData<List<BikeStationBean>>()
+    private val bikeStationData = MutableLiveData<List<BikeStationBean>>()
     val dataShown = MutableLiveData<List<BikeStationBean>>()
     val metroStationData = MutableLiveData<List<MetroStationBean>>()
 

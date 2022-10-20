@@ -14,18 +14,14 @@ class BikeStationBean(
     var lastUpdate: Long,
     var id: Long
 ) {
-    fun hasAvailableStands(): Boolean {
-        return availableStands >= 1
+
+    override fun toString(): String {
+        return "$name\n$address"
     }
 
-    fun hasAvailableBikes(): Boolean {
-        return availableBikes >= 1
-    }
+    fun hasAvailableStands() = availableStands > 0
 
-    fun toString(bikeStationBean: BikeStationBean): String {
-        return bikeStationBean.toString()
-    }
-
+    fun hasAvailableBikes() = availableBikes > 0
 
     fun getLocation() = Location("").apply {
         this.latitude = position.lat

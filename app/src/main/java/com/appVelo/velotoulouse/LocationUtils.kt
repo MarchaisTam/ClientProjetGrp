@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 object LocationUtils {
 
     fun getLastKnownLocation(c: Context): Location? {
-
         //Contrôle de la permission
         if (ContextCompat.checkSelfPermission(c, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_DENIED
@@ -18,7 +17,7 @@ object LocationUtils {
             return null
         }
 
-        var lm = c.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val lm = c.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         //on teste chaque provider(réseau, GPS...) et
         //on garde la localisation avec la meilleurs précision
@@ -26,11 +25,9 @@ object LocationUtils {
             .minByOrNull { it?.accuracy ?: Float.MAX_VALUE }
     }
 
-    fun getLastKnownCoord(c :Context) : CoordBean? {
-
-        var position: Location? = getLastKnownLocation(c) ?: return null
-        return CoordBean(position!!.latitude, position!!.longitude)
-
+    fun getLastKnownCoord(c: Context): CoordBean? {
+        val position: Location = getLastKnownLocation(c) ?: return null
+        return CoordBean(position.latitude, position.longitude)
     }
 
 }

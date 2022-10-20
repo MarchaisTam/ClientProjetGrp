@@ -1,15 +1,12 @@
 package com.appVelo.velotoulouse
 
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-
 class MetroStationBean(
-    var id : Int,
-    var name : String,
-    var longitude : Double,
+    var id: Int,
+    var name: String,
+    var longitude: Double,
     var latitude: Double,
-    var line : String,
-    var icon : Int
+    var line: String,
+    var icon: Int
 ) {
 
     fun setIcon() {
@@ -20,8 +17,6 @@ class MetroStationBean(
             else -> R.drawable.ic_metro_station_red
         }
     }
-
-
 
 }
 
