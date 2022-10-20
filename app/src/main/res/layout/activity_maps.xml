@@ -22,24 +22,28 @@
             android:id="@+id/switch1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginHorizontal="20dp"
             android:text="Afficher stations de métro : " />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <CheckBox
                 android:id="@+id/cb_veloDispo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_weight="1"
                 android:text="Vélo disponible" />
 
             <CheckBox
                 android:id="@+id/cb_placeDispo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_weight="1"
                 android:text="Place disponible" />
 
         </LinearLayout>
@@ -47,6 +51,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal">
 
             <TextView
@@ -69,19 +76,19 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btGetBikeStations"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="Toutes les stations" />
-
-        <Button
             android:id="@+id/btGetNearestBikeStations"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="0dp"
             android:text="Station la plus proche" />
+
+        <Button
+            android:id="@+id/btGetBikeStations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="Toutes les stations" />
 
         <ProgressBar
             android:id="@+id/progressBar"
