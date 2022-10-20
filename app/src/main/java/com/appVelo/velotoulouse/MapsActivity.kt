@@ -20,12 +20,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import kotlin.concurrent.thread
 
 
@@ -173,9 +169,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         }
 
         binding.switch1.setOnClickListener {
-            mMap.clear()
-            displayBikeStations()
-            displayMetroStations()
+            refreshMap()
         }
         
     }
@@ -187,32 +181,47 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWind
         }
     }
 
-    fun displayBikeStations() {
+    fun displayBikeStations(latLngBounds : LatLngBounds.Builder) {
         onLocationPermissonGranted()
+
+
         model.dataShown.value?.forEach {
             val bikeStation = it.position.toLatLng()
+            latLngBounds.include(bikeStation)
             mMap.addMarker(
-                MarkerOptions().position(bikeStation).title(it.name).snippet(it.address)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station))
-            )
+                MarkerOptions().position(bikeStation)
+                    //.title(it.name).snippet(it.address)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bike_station)))?.setTag(bikeStation)
         }
     }
 
-    fun displayMetroStations() {
+    fun displayMetroStations(latLngBounds : LatLngBounds.Builder) {
         if (!binding.switch1.isChecked) return
 
         model.metroStationData.value?.forEach {
             val metroStation = LatLng(it.latitude, it.longitude)
+            latLngBounds.include(metroStation)
             mMap.addMarker(
                 MarkerOptions().position(metroStation).title(it.name)
                     .icon(it.icon))
         }
     }
 
+
+
+
+
+
+
     fun refreshMap() {
         mMap.clear()
-        displayBikeStations()
-        displayMetroStations()
+        var latLngBounds = LatLngBounds.Builder()
+        val toulouse = LatLng(43.604652, 1.444209)
+        latLngBounds.include(toulouse)
+        displayBikeStations(latLngBounds)
+        displayMetroStations(latLngBounds)
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds.build(), 100))
+
     }
 
 }
